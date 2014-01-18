@@ -2,14 +2,17 @@
 # ==================================================
 run "echo Added gem file"
 
-gem_group :development do
+gem "thin"
+gem 'newrelic_rpm'
+
+gem_group :development, :test do
+  gem "pry-rails"
   gem "rspec-rails"
-  gem "rails-erd"
+  gem 'factory_girl_rails'
 end
 
 gem_group :test do
-  gem 'simplecov', :require => false
-  gem 'simplecov-rcov', :require => false
+  gem 'database_cleaner'
 end
 
 # Install spec_helper.rb
@@ -17,23 +20,16 @@ end
 run "./bin/rails g rspec:install"
 run "rm -rf test"
 
-if yes?("Whould you like to use carrierwave ?")
-  gem 'carrierwave'
-  gem 'rmagick', :require => false
-end
+gem 'haml-rails'
+gem "compass-rails"
 
+gem 'rainbow'
 gem 'settingslogic'
+gem 'google-analytics-rails'
+gem 'kaminari'
+gem 'draper'
 
-if yes?('Would you like to use nokogiri?')
-  gem 'nokogiri'
-end
-
-if yes?('Would you like to use cron?')
-  gem 'whenever'
-  run "bundle exec wheneverize"
-end
-
-if yes?("This app will be following up on both the smartphone and PC?")
+if yes?("use jpmobile?")
   gem 'jpmobile'
 end
 
@@ -81,58 +77,6 @@ table_names.each do |table_name|
   require(path) if File.exist?(path)
 end
 EOF"
-
-
-if yes?('Do you want to upload to Amazon S3 in the file?')
-  gem 'fog'
-
-  # Setting carrierwave using fog
-  # ==================================================
-  run "echo Set carrierwave config"
-
-  run "cat << EOF >> config/initializers/carrierwave.rb
-if Rails.env.production? || Rails.env.staging?
-  CONFIG = YAML.load_file(Rails.root.to_s + \"/config/aws.yml\")[Rails.env]
-  CarrierWave.configure do |config|
-    config.storage = :fog
-    config.fog_credentials = {
-      :provider              => 'AWS',
-      :aws_access_key_id     => CONFIG[\"access_key\"],
-      :aws_secret_access_key => CONFIG[\"secret_key\"],
-      :region                => CONFIG[\"region\"],
-    }
-    config.fog_directory = CONFIG[\"bucket\"]
-    config.asset_host    = CONFIG[\"host\"]
-  end
-else
-  CarrierWave.configure do |config|
-    config.storage = :file
-    config.asset_host = Settings.host
-  end
-end
-EOF"
-
-  run "cat << EOF >> config/aws.yml
-test:
-  access_key: < ACCESS_KEY >
-  secret_access_key: < SECRET ACCESS KEY >
-  bucket: < BUCKET >
-  region: < REGION >
-  host: < HOST >
-development:
-  access_key: < ACCESS_KEY >
-  secret_access_key: < SECRET ACCESS KEY >
-  bucket: < BUCKET >
-  region: < REGION >
-  host: < HOST >
-production:
-  access_key: < ACCESS_KEY >
-  secret_access_key: < SECRET ACCESS KEY >
-  bucket: < BUCKET >
-  region: < REGION >
-  host: < HOST >
-EOF"
-end
 
 # Set .gitignore
 # ==================================================
